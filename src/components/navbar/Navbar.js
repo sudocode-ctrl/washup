@@ -6,7 +6,7 @@ import logo from '../../images/logo.png'
 import {
     signOut,
 } from "firebase/auth";
-import { auth } from "../../firebase-config";
+import { auth } from "../../firebase/firebase-config";
 const Navbar = () => {
     const location = useLocation;
     let navigate = useNavigate();
@@ -40,33 +40,34 @@ const Navbar = () => {
                             </li>
                             <li className="listItem">
                                 <Link to="/" className="title">
-                                    WashUp
+                                    Washing Machine Manufacturing Data
                                 </Link>
                             </li>
 
                         </ul>
                     </div>
+                    { localStorage.getItem("washupUser") &&
                     <div className="">
                         <ul className="list">
                             <li className="listItem">
-                                <Link to="/">Home</Link>
+                                <Link to="/dashboard1">Upload Data</Link>
                             </li>
                             <li className="listItem">
-                                <Link to="/about">About</Link>
+                                <Link to="/dashboard2">Department's data</Link>
                             </li>
-
-
+                            <li className="listItem">
+                                <Link to="/dashboard3">Data Monitoring</Link>
+                            </li>
                         </ul>
                     </div>
-
-
+                    }
                     <div className="logout">
                         {(!localStorage.getItem("token")) && location.pathname !== '/home' ?
                             (<form className="" role="search">
 
                                 <Link className="btn  mx-2" to="/" role="button">Login</Link>
 
-                            </form>) : <> {localStorage.getItem("washupUser") ? localStorage.getItem("washupUser") : ""} <button onClick={handleLogout} className='btn '>Logout</button> <span className="usericon"><img className="usericon" src={""} alt="user icon" /></span> <span>  {localStorage.getItem("name")}</span></>
+                            </form>) : <> {localStorage.getItem("washupUser") ? localStorage.getItem("washupUser") : ""} <button onClick={handleLogout} className='btn '>Logout</button><span>  {localStorage.getItem("name")}</span></>
                         }
                     </div>
                 </div>

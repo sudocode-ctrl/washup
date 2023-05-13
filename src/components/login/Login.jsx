@@ -1,96 +1,116 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { Component } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./Login.css";
-// import {
-//   createUserWithEmailAndPassword,
-//   signInWithEmailAndPassword,
-//   onAuthStateChanged,
-//   signOut,
-// } from "firebase/auth";
-// import { auth } from "../../firebase-config";
-const Login = (props) => {
-  const [credentials, setCredentials] = useState({ email: "", password: "" });
-  useEffect(() => {
-    console.log(credentials);
-  }, [credentials]);
-  // const [user, setUser] = useState({});
-  // onAuthStateChanged(auth, (currentUser) => {
-  //   setUser(currentUser);
-  // });
-  const navigate = useNavigate();
-  const userRef = useRef();
-  const passRef = useRef();
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setCredentials({
-      email: userRef.current.value,
-      password: passRef.current.value,
-    });
-    console.log(credentials);
-    // try {
-    //   const user = await signInWithEmailAndPassword(
-    //     auth,
-    //     credentials.email,
-    //     credentials.password
-    //   );
-    //   localStorage.setItem("washupUser", user.email);
-    //   console.log(user);
-    // } catch (error) {
-    //   console.log(error.message);
-    // }
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut,
+  getAuth
+} from "firebase/auth";
+import { auth } from "../../firebase/firebase-config";
+import {withRouter} from '../../withRouter';
 
-    if (false) {
-      alert("Logged in Successfully");
+const INITIAL_STATE = {
+  email: '',
+  password: '',
+  role: null,
+  error: null
 
-      // navigate("/home");
-    } else {
-      console.log("invalid credentials", "danger");
-      alert("Invalid credentials", "danger");
-    }
-  };
-
-  return (
-    <div className="mt-3 login">
-      <div className="login-box">
-        <h2 className="m-80">Login to your User Account</h2>
-        <form onSubmit={handleSubmit} className="login-form">
-          <div className="mb-3">
-            <label htmlFor="email" className="form-label">
-              Email address:
-            </label>
-            <div>
-              <input
-                type="email"
-                ref={userRef}
-                className="form-control"
-                id="email"
-                name="email"
-                aria-describedby="emailHelp"
-              />
-            </div>
-          </div>
-          <div className="mb-3">
-            <label htmlFor="password" className="form-label">
-              Password:
-            </label>
-            <div>
-              <input
-                type="password"
-                ref={passRef}
-                className="form-control"
-                name="password"
-                id="password"
-              />
-            </div>
-          </div>
-
-          <button type="submit" className="btn ">
-            Submit
-          </button>
-        </form>
-      </div>
-    </div>
-  );
 };
 
-export default Login;
+const byPropKey = (propertyName, value) => () => ({
+  [propertyName]: value,
+});
+
+class Login extends Component {
+  constructor(props) {
+    super(props);
+      this.state = { ...INITIAL_STATE };
+      this.onSubmit = this.onSubmit.bind(this);
+  }
+  
+  onSubmit = (event) => {
+    const {
+      email,
+      password,
+    } = this.state;
+
+    const auth = getAuth();
+    signInWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      localStorage.setItem("washupUser", userCredential.user.email);
+      localStorage.setItem("token", userCredential.user.email);
+      this.props.navigate('/dashboard1');
+    })
+    .catch((error) => {
+      this.setState(byPropKey('error', error));
+    });
+
+  event.preventDefault();
+  }
+
+  
+  render () {
+
+    const {
+      email,
+      password,
+      error,
+    } = this.state;
+
+
+    return (
+      <section>
+        <div className="mt-3 login">
+          <div className="login-box">
+            <div className="m-80">
+                <form onSubmit={this.onSubmit}>
+                  {error && (
+                    <div className="notification is-danger">
+                      <button className="delete" />
+                      {error.message}
+                    </div>
+                  )}
+                  <div className="field">
+                    <div className="control">
+                      <input
+                        value={email}
+                        className="input"
+                        type="email"
+                        name="email"
+                        placeholder="Your Email"
+                        autoFocus=""
+                        onChange={event => this.setState(byPropKey('email', event.target.value))}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="field">
+                    <div className="control">
+                      <input
+                        value={password}
+                        className="input"
+                        type="password"
+                        name="password"
+                        placeholder="Your Password"
+                        onChange={this.handleInputChange}onChange={event => this.setState(byPropKey('password', event.target.value))}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <button className="button is-block is-primary is-fullwidth" type="submit">
+                    Login
+                  </button>
+                </form>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+}
+
+export default withRouter(Login);
